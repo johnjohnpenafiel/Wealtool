@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -14,18 +14,25 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import SuggestStates from "@/components/SuggestStates";
+import { states } from "@/lib/data/states";
 
+// Form Schema
 const formSchema = z.object({
   state: z
     .string()
-    .min(4, { message: "State must be at least 4 characters" })
-    .max(12, { message: "State must be less than 12 characters" }),
+    .refine((val) => states.some((state) => state.name === val), {
+      message: "Please enter a valid state",
+    }),
   school: z
     .string()
     .max(50, { message: "College must be less than 50 characters" }),
 });
 
+// School Form
 const SchoolForm = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const schoolInputRef = useRef<HTMLInputElement>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,14 +40,22 @@ const SchoolForm = () => {
       school: "",
     },
   });
+  // Handle State Selection
+  const handleStateSelect = (stateName: string) => {
+    form.setValue("state", stateName);
+    setSearchTerm(""); // Clear search term to hide dropdown
+    // Focus the school input after state selection
+    if (schoolInputRef.current) {
+      schoolInputRef.current.focus();
+    }
+  };
 
-  //  If the state is less than 4 characters, the school input is disabled
-  const stateValue = form.watch("state");
+  // Check if state field is valid
+  const stateFieldState = form.getFieldState("state");
+  const isStateValid = !stateFieldState.invalid && stateFieldState.isDirty;
 
-  // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     console.log(values);
   }
   return (
@@ -49,22 +64,36 @@ const SchoolForm = () => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 w-full h-full px-10 py-6 md:px-24 md:py-6"
       >
+        {/* State Input */}
         <FormField
           control={form.control}
           name="state"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="relative">
               <FormControl>
                 <Input
+                  autoComplete="off"
                   placeholder="School Location"
                   {...field}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    field.onChange(e);
+                  }}
                   className="h-16 md:h-28 text-2xl md:text-7xl md:placeholder:text-7xl border-4 border-neutral-400/80 placeholder:text-neutral-500"
                 />
               </FormControl>
               <FormMessage />
+              {/* Suggest States */}
+              {searchTerm.length > 0 && (
+                <SuggestStates
+                  searchTerm={searchTerm}
+                  onStateSelect={handleStateSelect}
+                />
+              )}
             </FormItem>
           )}
         />
+        {/* School Input */}
         <FormField
           control={form.control}
           name="school"
@@ -72,10 +101,12 @@ const SchoolForm = () => {
             <FormItem>
               <FormControl>
                 <Input
+                  autoComplete="off"
                   placeholder="School Name"
                   {...field}
+                  ref={schoolInputRef}
+                  disabled={!isStateValid}
                   className="h-16 md:h-28 text-2xl md:text-7xl md:placeholder:text-7xl border-4 border-neutral-400/80 placeholder:text-neutral-500"
-                  disabled={!stateValue || stateValue.length < 4}
                 />
               </FormControl>
               <FormMessage />
