@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-
+import React, { useState, useRef, useEffect } from "react";
+// Hooks
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+// Components
 import {
   Form,
   FormControl,
@@ -15,9 +16,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SuggestStates from "@/components/SuggestStates";
+import SuggestSchools from "@/components/SuggestSchools";
+// Data
 import { states } from "@/lib/data/states";
+// API
+import { fetchSchools } from "@/lib/api";
 
-// Form Schema
+// ----- Form Schema ----- //
 const formSchema = z.object({
   state: z
     .string()
@@ -26,13 +31,20 @@ const formSchema = z.object({
     }),
   school: z
     .string()
-    .max(50, { message: "College must be less than 50 characters" }),
+    .max(150, { message: "School must be less than 150 characters" }),
 });
 
-// School Form
-const SchoolForm = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+// -------------------------- School Form -------------------------- //
+export default function SchoolForm() {
+  // ----- State ----- //
+  const [stateSearchTerm, setStateSearchTerm] = useState("");
+  const [schoolSearchTerm, setSchoolSearchTerm] = useState("");
+  const [stateCode, setStateCode] = useState("");
+  const [schools, setSchools] = useState<string[]>([]);
+  const [selectedSchool, setSelectedSchool] = useState("");
+  // ----- Refs ----- //
   const schoolInputRef = useRef<HTMLInputElement>(null);
+  // ----- Form ----- //
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,24 +52,46 @@ const SchoolForm = () => {
       school: "",
     },
   });
-  // Handle State Selection
+  // ----- Check if state field is valid ----- //
+  const inputState = form.getFieldState("state");
+  const isStateValid = !inputState.invalid && inputState.isDirty;
+
+  // ----- Handle State Selection ----- //
   const handleStateSelect = (stateName: string) => {
     form.setValue("state", stateName);
-    setSearchTerm(""); // Clear search term to hide dropdown
-    // Focus the school input after state selection
+    const selectedStateCode = states.find(
+      (state) => state.name === stateName
+    )?.code;
+    setStateCode(selectedStateCode || "");
+    setStateSearchTerm("");
     if (schoolInputRef.current) {
       schoolInputRef.current.focus();
     }
   };
 
-  // Check if state field is valid
-  const stateFieldState = form.getFieldState("state");
-  const isStateValid = !stateFieldState.invalid && stateFieldState.isDirty;
+  // ----- Handle School Selection ----- //
+  const handleSchoolSelect = (schoolName: string) => {
+    form.setValue("school", schoolName);
+    setSchoolSearchTerm("");
+  };
 
+  // ----- Fetch Schools ----- //
+  useEffect(() => {
+    if (stateCode && isStateValid) {
+      fetchSchools(stateCode).then((schools) => {
+        setSchools(schools);
+        console.log("Fetched schools:", schools);
+      });
+    } else {
+      setSchools([]); // Reset schools when state is invalid
+    }
+  }, [stateCode, isStateValid]);
+
+  // ----- Handle Form Submission ----- //
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
     console.log(values);
   }
+  // ----- Render ----- //
   return (
     <Form {...form}>
       <form
@@ -76,7 +110,11 @@ const SchoolForm = () => {
                   placeholder="School Location"
                   {...field}
                   onChange={(e) => {
-                    setSearchTerm(e.target.value);
+                    setStateSearchTerm(e.target.value);
+                    setStateCode(
+                      states.find((state) => state.name === e.target.value)
+                        ?.code || ""
+                    );
                     field.onChange(e);
                   }}
                   className="h-16 md:h-28 text-2xl md:text-7xl md:placeholder:text-7xl border-4 border-neutral-400/80 placeholder:text-neutral-500"
@@ -84,9 +122,9 @@ const SchoolForm = () => {
               </FormControl>
               <FormMessage />
               {/* Suggest States */}
-              {searchTerm.length > 0 && (
+              {stateSearchTerm.length > 0 && (
                 <SuggestStates
-                  searchTerm={searchTerm}
+                  searchTerm={stateSearchTerm}
                   onStateSelect={handleStateSelect}
                 />
               )}
@@ -98,7 +136,7 @@ const SchoolForm = () => {
           control={form.control}
           name="school"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="relative">
               <FormControl>
                 <Input
                   autoComplete="off"
@@ -106,10 +144,21 @@ const SchoolForm = () => {
                   {...field}
                   ref={schoolInputRef}
                   disabled={!isStateValid}
+                  onChange={(e) => {
+                    setSchoolSearchTerm(e.target.value);
+                    field.onChange(e);
+                  }}
                   className="h-16 md:h-28 text-2xl md:text-7xl md:placeholder:text-7xl border-4 border-neutral-400/80 placeholder:text-neutral-500"
                 />
               </FormControl>
               <FormMessage />
+              {schoolSearchTerm.length > 0 && isStateValid && (
+                <SuggestSchools
+                  schools={schools}
+                  searchTerm={schoolSearchTerm}
+                  onSchoolSelect={handleSchoolSelect}
+                />
+              )}
             </FormItem>
           )}
         />
@@ -119,6 +168,4 @@ const SchoolForm = () => {
       </form>
     </Form>
   );
-};
-
-export default SchoolForm;
+}
