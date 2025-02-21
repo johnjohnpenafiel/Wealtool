@@ -1,33 +1,37 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { states } from "@/lib/data/states";
 
 interface SuggestStatesProps {
   searchTerm: string;
   onStateSelect: (stateName: string) => void;
+  data: string[];
 }
 
-const SuggestStates = ({ searchTerm, onStateSelect }: SuggestStatesProps) => {
+const SuggestStates = ({
+  searchTerm,
+  onStateSelect,
+  data,
+}: SuggestStatesProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isKeyboardNav, setIsKeyboardNav] = useState(false);
 
-  const filteredStates = states.filter((state) =>
-    state.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = data.filter((d) =>
+    d.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const limitedStates = filteredStates.slice(0, 8);
+  const limitedData = filteredData.slice(0, 8);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!limitedStates.length) return;
+      if (!limitedData.length) return;
 
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
           setIsKeyboardNav(true);
           setSelectedIndex((prev) =>
-            prev < limitedStates.length - 1 ? prev + 1 : prev
+            prev < limitedData.length - 1 ? prev + 1 : prev
           );
           break;
         case "ArrowUp":
@@ -37,26 +41,26 @@ const SuggestStates = ({ searchTerm, onStateSelect }: SuggestStatesProps) => {
           break;
         case "Enter":
           e.preventDefault();
-          onStateSelect(limitedStates[selectedIndex].name);
+          onStateSelect(limitedData[selectedIndex]);
           break;
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [limitedStates, selectedIndex, onStateSelect]);
+  }, [limitedData, selectedIndex, onStateSelect]);
 
   return (
     <ul
-      className={`absolute w-full z-10 bg-background rounded-md border-neutral-400/80 max-h-[600px] overflow-y-auto`}
+      className={`absolute w-full z-10 bg-background rounded-md border-neutral-400/80 max-h-[450px] overflow-y-auto`}
     >
-      {limitedStates.map((state, index) => (
+      {limitedData.map((d, index) => (
         <li
-          className={`h-16 md:h-28 text-2xl md:text-7xl px-4 py-5 cursor-pointer border-b last:border-b-0 ${
+          className={`min-h-16 md:min-h-28 text-2xl md:text-7xl px-4 py-5 cursor-pointer border-b last:border-b-0 ${
             index === selectedIndex ? "bg-neutral-300/20" : ""
           }`}
-          key={state.code}
-          onClick={() => onStateSelect(state.name)}
+          key={d}
+          onClick={() => onStateSelect(d)}
           onMouseEnter={() => {
             setIsKeyboardNav(false);
             setSelectedIndex(index);
@@ -68,7 +72,7 @@ const SuggestStates = ({ searchTerm, onStateSelect }: SuggestStatesProps) => {
             }
           }}
         >
-          {state.name}
+          {d}
         </li>
       ))}
     </ul>

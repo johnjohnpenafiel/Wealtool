@@ -15,8 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import SuggestStates from "@/components/SuggestStates";
-import SuggestSchools from "@/components/SuggestSchools";
+import SuggestData from "@/components/SuggestData";
 // Data
 import { states } from "@/lib/data/states";
 // API
@@ -41,7 +40,6 @@ export default function SchoolForm() {
   const [schoolSearchTerm, setSchoolSearchTerm] = useState("");
   const [stateCode, setStateCode] = useState("");
   const [schools, setSchools] = useState<string[]>([]);
-  const [selectedSchool, setSelectedSchool] = useState("");
   // ----- Refs ----- //
   const schoolInputRef = useRef<HTMLInputElement>(null);
   // ----- Form ----- //
@@ -80,7 +78,6 @@ export default function SchoolForm() {
     if (stateCode && isStateValid) {
       fetchSchools(stateCode).then((schools) => {
         setSchools(schools);
-        console.log("Fetched schools:", schools);
       });
     } else {
       setSchools([]); // Reset schools when state is invalid
@@ -123,9 +120,10 @@ export default function SchoolForm() {
               <FormMessage />
               {/* Suggest States */}
               {stateSearchTerm.length > 0 && (
-                <SuggestStates
+                <SuggestData
                   searchTerm={stateSearchTerm}
                   onStateSelect={handleStateSelect}
+                  data={states.map((state) => state.name)}
                 />
               )}
             </FormItem>
@@ -153,10 +151,10 @@ export default function SchoolForm() {
               </FormControl>
               <FormMessage />
               {schoolSearchTerm.length > 0 && isStateValid && (
-                <SuggestSchools
-                  schools={schools}
+                <SuggestData
                   searchTerm={schoolSearchTerm}
-                  onSchoolSelect={handleSchoolSelect}
+                  data={schools}
+                  onStateSelect={handleSchoolSelect}
                 />
               )}
             </FormItem>
