@@ -96,7 +96,7 @@ export default function SchoolForm() {
   // ----- Handle Form Submission ----- //
   async function onSubmit(values: z.infer<typeof formSchema>) {
     await submitSchool(values.school);
-    router.push(`/${encodeURIComponent(values.school)}`);
+    router.push(`/school/${encodeURIComponent(values.school)}`);
   }
 
   // Add this constant at the top of the component

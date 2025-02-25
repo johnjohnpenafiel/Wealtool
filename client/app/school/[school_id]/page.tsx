@@ -1,24 +1,18 @@
 import React from "react";
 import { fetchUniversity } from "@/lib/api";
-import SchoolHeader from "./components/SchoolHeader";
-import SchoolStats from "./components/SchoolStats";
+import SchoolHeader from "@/app/school/components/SchoolHeader";
+import SchoolStats from "@/app/school/components/SchoolStats";
 
-async function UniversityPage({
-  params,
-}: {
-  params: { universityName: string };
-}) {
-  const { universityName } = await params;
-  const university = decodeURIComponent(universityName);
-  const data = await fetchUniversity(university);
+async function SchoolPage({ params }: { params: { school_id: string } }) {
+  const { school_id } = await params;
+  const school = decodeURIComponent(school_id);
+  const data = await fetchUniversity(school);
   const schoolData = data.results[0];
 
   if (!schoolData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold text-red-500">
-          University not found
-        </h1>
+        <h1 className="text-2xl font-bold text-red-500">School not found</h1>
       </div>
     );
   }
@@ -49,4 +43,4 @@ async function UniversityPage({
   );
 }
 
-export default UniversityPage;
+export default SchoolPage;
