@@ -25,12 +25,19 @@ import { useRouter } from "next/navigation";
 // Actions
 import { submitSchool } from "@/app/actions/schoolActions";
 
+// Add this interface
+interface School {
+  id: string;
+  name: string;
+}
+
 // -------------------------- School Form -------------------------- //
 export default function SchoolForm() {
   // ----- State ----- //
   const [searchTerms, setSearchTerms] = useState({ state: "", school: "" });
   const [stateCode, setStateCode] = useState("");
-  const [schools, setSchools] = useState<string[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
 
   // ----- Refs ----- //
   const schoolInputRef = useRef<HTMLInputElement>(null);
@@ -45,7 +52,7 @@ export default function SchoolForm() {
     school: z
       .string()
       .max(150, { message: "School must be less than 150 characters" })
-      .refine((val) => schools.includes(val), {
+      .refine((val) => schools.some((school) => school.name === val), {
         message: "Please enter a valid school",
       }),
   });
@@ -76,14 +83,18 @@ export default function SchoolForm() {
       if (schoolInputRef.current) {
         schoolInputRef.current.focus();
       }
+    } else if (field === "school") {
+      // Set the selected school ID when a school is selected
+      const selectedSchool = schools.find((school) => school.name === value);
+      setSelectedSchoolId(selectedSchool?.id || null);
     }
   };
 
   // ----- Fetch Schools ----- //
   useEffect(() => {
     if (stateCode && isStateValid) {
-      fetchSchools(stateCode).then((schools) => {
-        setSchools(schools);
+      fetchSchools(stateCode).then((schoolsData) => {
+        setSchools(schoolsData);
       });
     } else {
       setSchools([]); // Reset schools when state is invalid
@@ -95,8 +106,12 @@ export default function SchoolForm() {
 
   // ----- Handle Form Submission ----- //
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await submitSchool(values.school);
-    router.push(`/school/${encodeURIComponent(values.school)}`);
+    if (!selectedSchoolId) {
+      console.error("No school ID selected");
+      return;
+    }
+    await submitSchool(selectedSchoolId);
+    router.push(`/school/${selectedSchoolId}`);
   }
 
   // Add this constant at the top of the component
@@ -173,7 +188,7 @@ export default function SchoolForm() {
               {searchTerms.school.length > 0 && isStateValid && (
                 <SuggestData
                   searchTerm={searchTerms.school}
-                  data={schools}
+                  data={schools.map((school) => school.name)}
                   onSelect={(value) => handleSelect("school", value)}
                 />
               )}

@@ -1,8 +1,8 @@
 "use server";
 
-import { fetchUniversity } from "@/lib/api";
+import { fetchSchool } from "@/lib/api";
 
-export async function submitSchool(universityName: string) {
-  const data = await fetchUniversity(universityName);
+export async function submitSchool(school_id: string) {
+  const data = await fetchSchool(school_id);
   return data;
 }

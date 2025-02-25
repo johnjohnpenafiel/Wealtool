@@ -1,12 +1,12 @@
 import React from "react";
-import { fetchUniversity } from "@/lib/api";
+import { fetchSchool } from "@/lib/api";
 import SchoolHeader from "@/app/school/components/SchoolHeader";
 import SchoolStats from "@/app/school/components/SchoolStats";
 
 async function SchoolPage({ params }: { params: { school_id: string } }) {
   const { school_id } = await params;
   const school = decodeURIComponent(school_id);
-  const data = await fetchUniversity(school);
+  const data = await fetchSchool(school);
   const schoolData = data.results[0];
 
   if (!schoolData) {
