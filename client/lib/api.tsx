@@ -7,33 +7,54 @@ type SchoolResponse = {
 
 export async function fetchSchools(stateCode: string): Promise<string[]> {
   const API_KEY = process.env.NEXT_PUBLIC_COLLEGEBOARD_API_KEY;
-  let allSchools: string[] = [];
-  let page = 0;
-  let total = Infinity; // Start with an arbitrary high value
+  const PER_PAGE = 100;
 
-  do {
-    const url = `https://api.data.gov/ed/collegescorecard/v1/schools?api_key=${API_KEY}&school.state=${stateCode}&fields=school.name&per_page=100&page=${page}`;
+  const initialUrl = `https://api.data.gov/ed/collegescorecard/v1/schools?api_key=${API_KEY}&school.state=${stateCode}&fields=school.name&per_page=${PER_PAGE}&page=0`;
 
-    try {
-      const response = await fetch(url);
-      const data: SchoolResponse = await response.json();
+  try {
+    const initialResponse = await fetch(initialUrl);
+    const initialData: SchoolResponse = await initialResponse.json();
+    const total = initialData.metadata.total;
 
-      if (data.results.length > 0) {
-        allSchools = [
-          ...allSchools,
-          ...data.results.map((school) => school["school.name"]),
-        ];
-        total = data.metadata.total;
-      } else {
-        break; // Stop if no more results
-      }
+    // Calculate total number of pages
+    const totalPages = Math.ceil(total / PER_PAGE);
 
-      page++;
-    } catch (error) {
-      console.error("Error fetching schools:", error);
-      break;
+    // If there's only one page, return the initial results
+    if (totalPages <= 1) {
+      return initialData.results.map((school) => school["school.name"]);
     }
-  } while (allSchools.length < total);
 
-  return allSchools;
+    // Create array of promises for parallel fetching (starting from page 1)
+    const fetchPromises = Array.from({ length: totalPages - 1 }, (_, i) =>
+      fetch(
+        `https://api.data.gov/ed/collegescorecard/v1/schools?api_key=${API_KEY}&school.state=${stateCode}&fields=school.name&per_page=${PER_PAGE}&page=${
+          i + 1
+        }`
+      )
+        .then((response) => response.json())
+        .catch((error) => {
+          console.error(`Error fetching page ${i + 1}:`, error);
+          return { results: [] };
+        })
+    );
+
+    // Wait for all fetches to complete
+    const results = await Promise.all(fetchPromises);
+
+    // Combine initial results with the rest
+    const allSchools = [
+      ...initialData.results.map((school) => school["school.name"]),
+      ...results.flatMap(
+        (data) =>
+          data.results?.map(
+            (school: { "school.name": string }) => school["school.name"]
+          ) || []
+      ),
+    ];
+
+    return allSchools;
+  } catch (error) {
+    console.error("Error fetching schools:", error);
+    return [];
+  }
 }

@@ -2,17 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 
-interface SuggestStatesProps {
+interface SuggestDataProps {
   searchTerm: string;
-  onStateSelect: (stateName: string) => void;
+  onSelect: (stateName: string) => void;
   data: string[];
 }
 
-const SuggestStates = ({
-  searchTerm,
-  onStateSelect,
-  data,
-}: SuggestStatesProps) => {
+const SuggestData = ({ searchTerm, onSelect, data }: SuggestDataProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isKeyboardNav, setIsKeyboardNav] = useState(false);
 
@@ -41,14 +37,14 @@ const SuggestStates = ({
           break;
         case "Enter":
           e.preventDefault();
-          onStateSelect(limitedData[selectedIndex]);
+          onSelect(limitedData[selectedIndex]);
           break;
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [limitedData, selectedIndex, onStateSelect]);
+  }, [limitedData, selectedIndex, onSelect]);
 
   return (
     <ul
@@ -59,8 +55,8 @@ const SuggestStates = ({
           className={`min-h-16 md:min-h-28 text-2xl md:text-7xl px-4 py-5 cursor-pointer border-b last:border-b-0 ${
             index === selectedIndex ? "bg-neutral-300/20" : ""
           }`}
-          key={d}
-          onClick={() => onStateSelect(d)}
+          key={`${d}-${index}`}
+          onClick={() => onSelect(d)}
           onMouseEnter={() => {
             setIsKeyboardNav(false);
             setSelectedIndex(index);
@@ -79,7 +75,7 @@ const SuggestStates = ({
   );
 };
 
-export default SuggestStates;
+export default SuggestData;
 
 // 1. Filter the states based on the search term
 // 2. Limit the number of states to 8

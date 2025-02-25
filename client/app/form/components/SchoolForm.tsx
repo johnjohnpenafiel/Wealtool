@@ -21,27 +21,31 @@ import { states } from "@/lib/data/states";
 // API
 import { fetchSchools } from "@/lib/api";
 
-// ----- Form Schema ----- //
-const formSchema = z.object({
-  state: z
-    .string()
-    .refine((val) => states.some((state) => state.name === val), {
-      message: "Please enter a valid state",
-    }),
-  school: z
-    .string()
-    .max(150, { message: "School must be less than 150 characters" }),
-});
-
 // -------------------------- School Form -------------------------- //
 export default function SchoolForm() {
   // ----- State ----- //
-  const [stateSearchTerm, setStateSearchTerm] = useState("");
-  const [schoolSearchTerm, setSchoolSearchTerm] = useState("");
+  const [searchTerms, setSearchTerms] = useState({ state: "", school: "" });
   const [stateCode, setStateCode] = useState("");
   const [schools, setSchools] = useState<string[]>([]);
+
   // ----- Refs ----- //
   const schoolInputRef = useRef<HTMLInputElement>(null);
+
+  // ----- Form Schema ----- //
+  const formSchema = z.object({
+    state: z
+      .string()
+      .refine((val) => states.some((state) => state.name === val), {
+        message: "Please enter a valid state",
+      }),
+    school: z
+      .string()
+      .max(150, { message: "School must be less than 150 characters" })
+      .refine((val) => schools.includes(val), {
+        message: "Please enter a valid school",
+      }),
+  });
+
   // ----- Form ----- //
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,27 +54,25 @@ export default function SchoolForm() {
       school: "",
     },
   });
+
   // ----- Check if state field is valid ----- //
   const inputState = form.getFieldState("state");
   const isStateValid = !inputState.invalid && inputState.isDirty;
 
   // ----- Handle State Selection ----- //
-  const handleStateSelect = (stateName: string) => {
-    form.setValue("state", stateName);
-    const selectedStateCode = states.find(
-      (state) => state.name === stateName
-    )?.code;
-    setStateCode(selectedStateCode || "");
-    setStateSearchTerm("");
-    if (schoolInputRef.current) {
-      schoolInputRef.current.focus();
-    }
-  };
+  const handleSelect = (field: "state" | "school", value: string) => {
+    form.setValue(field, value);
+    setSearchTerms((prev) => ({ ...prev, [field]: "" }));
 
-  // ----- Handle School Selection ----- //
-  const handleSchoolSelect = (schoolName: string) => {
-    form.setValue("school", schoolName);
-    setSchoolSearchTerm("");
+    if (field === "state") {
+      const selectedStateCode = states.find(
+        (state) => state.name === value
+      )?.code;
+      setStateCode(selectedStateCode || "");
+      if (schoolInputRef.current) {
+        schoolInputRef.current.focus();
+      }
+    }
   };
 
   // ----- Fetch Schools ----- //
@@ -88,6 +90,11 @@ export default function SchoolForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
   }
+
+  // Add this constant at the top of the component
+  const INPUT_CLASSES =
+    "h-16 md:h-28 text-2xl md:text-7xl md:placeholder:text-7xl border-4 border-neutral-400/80 placeholder:text-neutral-500";
+
   // ----- Render ----- //
   return (
     <Form {...form}>
@@ -107,22 +114,24 @@ export default function SchoolForm() {
                   placeholder="School Location"
                   {...field}
                   onChange={(e) => {
-                    setStateSearchTerm(e.target.value);
+                    setSearchTerms((prev) => ({
+                      ...prev,
+                      state: e.target.value,
+                    }));
                     setStateCode(
                       states.find((state) => state.name === e.target.value)
                         ?.code || ""
                     );
                     field.onChange(e);
                   }}
-                  className="h-16 md:h-28 text-2xl md:text-7xl md:placeholder:text-7xl border-4 border-neutral-400/80 placeholder:text-neutral-500"
+                  className={INPUT_CLASSES}
                 />
               </FormControl>
               <FormMessage />
-              {/* Suggest States */}
-              {stateSearchTerm.length > 0 && (
+              {searchTerms.state.length > 0 && (
                 <SuggestData
-                  searchTerm={stateSearchTerm}
-                  onStateSelect={handleStateSelect}
+                  searchTerm={searchTerms.state}
+                  onSelect={(value) => handleSelect("state", value)}
                   data={states.map((state) => state.name)}
                 />
               )}
@@ -143,25 +152,33 @@ export default function SchoolForm() {
                   ref={schoolInputRef}
                   disabled={!isStateValid}
                   onChange={(e) => {
-                    setSchoolSearchTerm(e.target.value);
+                    setSearchTerms((prev) => ({
+                      ...prev,
+                      school: e.target.value,
+                    }));
                     field.onChange(e);
                   }}
-                  className="h-16 md:h-28 text-2xl md:text-7xl md:placeholder:text-7xl border-4 border-neutral-400/80 placeholder:text-neutral-500"
+                  className={INPUT_CLASSES}
                 />
               </FormControl>
               <FormMessage />
-              {schoolSearchTerm.length > 0 && isStateValid && (
+              {searchTerms.school.length > 0 && isStateValid && (
                 <SuggestData
-                  searchTerm={schoolSearchTerm}
+                  searchTerm={searchTerms.school}
                   data={schools}
-                  onStateSelect={handleSchoolSelect}
+                  onSelect={(value) => handleSelect("school", value)}
                 />
               )}
             </FormItem>
           )}
         />
-        <Button variant="outline" type="submit">
-          Submit
+        <Button
+          className="text-2xl font-medium text-neutral-500"
+          size={"lg"}
+          variant="outline"
+          type="submit"
+        >
+          Next
         </Button>
       </form>
     </Form>
