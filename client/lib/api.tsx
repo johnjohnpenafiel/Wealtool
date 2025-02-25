@@ -5,6 +5,21 @@ type SchoolResponse = {
   results: { "school.name": string }[];
 };
 
+type UniversityResponse = {
+  results: {
+    "school.name": string;
+    "school.city": string;
+    "school.state": string;
+    "school.school_url": string;
+    "latest.student.size": number;
+    "latest.cost.tuition.in_state": number;
+    "latest.cost.tuition.out_of_state": number;
+    "latest.aid.median_debt.completers.overall": number;
+    "latest.academics.program_available.bachelor": boolean;
+    "latest.earnings.10_yrs_after_entry.median": number;
+  }[];
+};
+
 export async function fetchSchools(stateCode: string): Promise<string[]> {
   const API_KEY = process.env.NEXT_PUBLIC_COLLEGEBOARD_API_KEY;
   const PER_PAGE = 100;
@@ -57,4 +72,13 @@ export async function fetchSchools(stateCode: string): Promise<string[]> {
     console.error("Error fetching schools:", error);
     return [];
   }
+}
+
+export async function fetchUniversity(universityName: string) {
+  const API_KEY = process.env.NEXT_PUBLIC_COLLEGEBOARD_API_KEY;
+
+  const initialUrl = `https://api.data.gov/ed/collegescorecard/v1/schools?api_key=${API_KEY}&school.name=${universityName}&fields=id,school.name,school.city,school.state,school.school_url,latest.student.size,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt.completers.overall,latest.academics.program_available.bachelor,latest.earnings.10_yrs_after_entry.median`;
+  const initialResponse = await fetch(initialUrl);
+  const initialData: UniversityResponse = await initialResponse.json();
+  return initialData;
 }

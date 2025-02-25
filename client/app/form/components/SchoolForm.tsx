@@ -20,6 +20,10 @@ import SuggestData from "@/components/SuggestData";
 import { states } from "@/lib/data/states";
 // API
 import { fetchSchools } from "@/lib/api";
+// Next
+import { useRouter } from "next/navigation";
+// Actions
+import { submitSchool } from "@/app/actions/schoolActions";
 
 // -------------------------- School Form -------------------------- //
 export default function SchoolForm() {
@@ -86,9 +90,13 @@ export default function SchoolForm() {
     }
   }, [stateCode, isStateValid]);
 
+  // ----- Router ----- //
+  const router = useRouter();
+
   // ----- Handle Form Submission ----- //
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    await submitSchool(values.school);
+    router.push(`/${encodeURIComponent(values.school)}`);
   }
 
   // Add this constant at the top of the component
