@@ -1,21 +1,37 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import ProgramForm from "./ProgramForm";
+import { fetchProgramData, ProgramResponse } from "@/lib/api";
+import ProgramCard from "./ProgramCard";
 
 interface Program {
   code: string;
   title: string;
 }
 
-export default function ProgramSection({ programs }: { programs: Program[] }) {
-  const handleProgramSubmit = (programCode: string) => {
-    // Handle the program selection here
+interface Props {
+  programs: Program[];
+  schoolId: string;
+}
+
+export default function ProgramSection({ programs, schoolId }: Props) {
+  const [programData, setProgramData] = useState<ProgramResponse | null>(null);
+
+  const handleProgramSubmit = async (programCode: string) => {
     console.log("Selected program code:", programCode);
-    // Navigate or perform other actions
+    const data = await fetchProgramData(schoolId, programCode);
+    setProgramData(data);
   };
   return (
-    <div className="mt-8">
-      <ProgramForm programs={programs} onSubmit={handleProgramSubmit} />
+    <div>
+      <div className="mt-8">
+        <ProgramForm programs={programs} onSubmit={handleProgramSubmit} />
+      </div>
+      {programData && (
+        <div className="mt-8">
+          <ProgramCard programData={programData} />
+        </div>
+      )}
     </div>
   );
 }

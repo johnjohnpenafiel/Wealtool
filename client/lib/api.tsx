@@ -28,6 +28,28 @@ type SchoolResponse = {
   }[];
 };
 
+type EarningsDetails = {
+  overall_median_earnings: number;
+};
+
+type HighestEarnings = {
+  highest: {
+    "1_yr": EarningsDetails;
+    "2_yr": EarningsDetails;
+  };
+};
+
+export type ProgramResponse = {
+  results: {
+    "latest.programs.cip_4_digit": {
+      code: string;
+      unit_id: string;
+      title: string;
+      earnings: HighestEarnings;
+    }[];
+  }[];
+};
+
 export async function fetchSchools(
   stateCode: string
 ): Promise<{ id: string; name: string }[]> {
@@ -103,8 +125,8 @@ export async function fetchProgramData(
 ) {
   const API_KEY = process.env.NEXT_PUBLIC_COLLEGEBOARD_API_KEY;
 
-  const initialUrl = `https://api.data.gov/ed/collegescorecard/v1/schools?api_key=${API_KEY}&id=${school_id}&latest.programs.cip_4_digit.code=${program_code}&latest.programs.cip_4_digit.credential.level=3&fields=latest.programs.cip_4_digit.unit_id,latest.programs.cip_4_digit.code,latest.programs.cip_4_digit.title,latest.programs.cip_4_digit.credential.title,latest.programs.cip_4_digit.earnings.highest.1_yr.overall_median_earnings,latest.programs.cip_4_digit.earnings.highest.2_yr.overall_median_earnings,latest.programs.cip_4_digit.debt.staff_grad_plus.all.all_inst.median,latest.programs.cip_4_digit.debt.staff_grad_plus.all.all_inst.average`;
+  const initialUrl = `https://api.data.gov/ed/collegescorecard/v1/schools?api_key=${API_KEY}&id=${school_id}&latest.programs.cip_4_digit.code=${program_code}&latest.programs.cip_4_digit.credential.level=3&fields=latest.programs.cip_4_digit.unit_id,latest.programs.cip_4_digit.code,latest.programs.cip_4_digit.title,latest.programs.cip_4_digit.earnings.highest.1_yr.overall_median_earnings,latest.programs.cip_4_digit.earnings.highest.2_yr.overall_median_earnings`;
   const initialResponse = await fetch(initialUrl);
-  const initialData: SchoolResponse = await initialResponse.json();
+  const initialData: ProgramResponse = await initialResponse.json();
   return initialData;
 }

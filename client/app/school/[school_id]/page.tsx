@@ -5,8 +5,8 @@ import ProgramSection from "@/app/school/components/ProgramSection";
 
 async function SchoolPage({ params }: { params: { school_id: string } }) {
   const { school_id } = await params;
-  const school = decodeURIComponent(school_id);
-  const data = await fetchSchool(school);
+  const schoolId = decodeURIComponent(school_id);
+  const data = await fetchSchool(schoolId);
   const schoolData = data.results[0];
 
   if (!schoolData) {
@@ -31,7 +31,7 @@ async function SchoolPage({ params }: { params: { school_id: string } }) {
   const programs = schoolData["latest.programs.cip_4_digit"];
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
+    <div className="container mx-auto py-16 px-4 max-w-6xl">
       <SchoolHeader name={name} city={city} state={state} url={url} />
       <SchoolStats
         studentSize={studentSize}
@@ -41,7 +41,7 @@ async function SchoolPage({ params }: { params: { school_id: string } }) {
         medianDebt={medianDebt}
       />
       <div className="mt-8">
-        <ProgramSection programs={programs} />
+        <ProgramSection programs={programs} schoolId={schoolId} />
       </div>
     </div>
   );
