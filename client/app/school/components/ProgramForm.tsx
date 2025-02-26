@@ -93,6 +93,8 @@ const ProgramForm = ({ programs, onSubmit }: ProgramFormProps) => {
                   searchTerm={searchTerm}
                   data={programs.map((program) => program.title)}
                   onSelect={handleSelect}
+                  className="max-h-[350px]"
+                  itemClassName="min-h-5 md:min-h-16 text-lg md:text-2xl"
                 />
               )}
             </FormItem>

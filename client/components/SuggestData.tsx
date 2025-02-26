@@ -1,14 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface SuggestDataProps {
   searchTerm: string;
   onSelect: (stateName: string) => void;
   data: string[];
+  className?: string;
+  itemClassName?: string;
 }
 
-const SuggestData = ({ searchTerm, onSelect, data }: SuggestDataProps) => {
+const SuggestData = ({
+  searchTerm,
+  onSelect,
+  data,
+  className,
+  itemClassName,
+}: SuggestDataProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isKeyboardNav, setIsKeyboardNav] = useState(false);
 
@@ -48,13 +57,18 @@ const SuggestData = ({ searchTerm, onSelect, data }: SuggestDataProps) => {
 
   return (
     <ul
-      className={`absolute w-full z-10 bg-background rounded-md border-neutral-400/80 max-h-[450px] overflow-y-auto`}
+      className={twMerge(
+        "absolute w-full z-10 bg-background rounded-md border-neutral-400/80 max-h-[450px] overflow-y-auto",
+        className
+      )}
     >
       {limitedData.map((d, index) => (
         <li
-          className={`min-h-16 md:min-h-28 text-2xl md:text-7xl px-4 py-5 cursor-pointer border-b last:border-b-0 ${
-            index === selectedIndex ? "bg-neutral-300/20" : ""
-          }`}
+          className={twMerge(
+            "min-h-16 md:min-h-28 text-2xl md:text-7xl px-4 py-5 cursor-pointer border-b last:border-b-0",
+            index === selectedIndex ? "bg-neutral-300/20" : "",
+            itemClassName
+          )}
           key={`${d}-${index}`}
           onClick={() => onSelect(d)}
           onMouseEnter={() => {
