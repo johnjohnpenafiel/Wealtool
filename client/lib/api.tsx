@@ -21,6 +21,10 @@ type SchoolResponse = {
     "latest.aid.median_debt.completers.overall": number;
     "latest.academics.program_available.bachelor": boolean;
     "latest.earnings.10_yrs_after_entry.median": number;
+    "latest.programs.cip_4_digit": {
+      code: string;
+      title: string;
+    }[];
   }[];
 };
 
@@ -87,7 +91,7 @@ export async function fetchSchools(
 export async function fetchSchool(school_id: string) {
   const API_KEY = process.env.NEXT_PUBLIC_COLLEGEBOARD_API_KEY;
 
-  const initialUrl = `https://api.data.gov/ed/collegescorecard/v1/schools?api_key=${API_KEY}&id=${school_id}&fields=id,school.name,school.city,school.state,school.school_url,latest.student.size,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt.completers.overall,latest.academics.program_available.bachelor,latest.earnings.10_yrs_after_entry.median`;
+  const initialUrl = `https://api.data.gov/ed/collegescorecard/v1/schools?api_key=${API_KEY}&id=${school_id}&fields=id,school.name,school.city,school.state,school.school_url,latest.student.size,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt.completers.overall,latest.academics.program_available.bachelor,latest.earnings.10_yrs_after_entry.median,latest.programs.cip_4_digit.code,latest.programs.cip_4_digit.title&latest.programs.cip_4_digit.credential.level=3`;
   const initialResponse = await fetch(initialUrl);
   const initialData: SchoolResponse = await initialResponse.json();
   return initialData;

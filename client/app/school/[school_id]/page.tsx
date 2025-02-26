@@ -1,7 +1,7 @@
-import React from "react";
 import { fetchSchool } from "@/lib/api";
 import SchoolHeader from "@/app/school/components/SchoolHeader";
 import SchoolStats from "@/app/school/components/SchoolStats";
+import ProgramSection from "@/app/school/components/ProgramSection";
 
 async function SchoolPage({ params }: { params: { school_id: string } }) {
   const { school_id } = await params;
@@ -28,6 +28,7 @@ async function SchoolPage({ params }: { params: { school_id: string } }) {
   const medianEarnings =
     schoolData["latest.earnings.10_yrs_after_entry.median"];
   const medianDebt = schoolData["latest.aid.median_debt.completers.overall"];
+  const programs = schoolData["latest.programs.cip_4_digit"];
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
@@ -39,6 +40,9 @@ async function SchoolPage({ params }: { params: { school_id: string } }) {
         medianEarnings={medianEarnings}
         medianDebt={medianDebt}
       />
+      <div className="mt-8">
+        <ProgramSection programs={programs} />
+      </div>
     </div>
   );
 }
