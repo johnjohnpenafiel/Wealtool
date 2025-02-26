@@ -57,7 +57,7 @@ const ProgramForm = ({ programs, onSubmit }: ProgramFormProps) => {
     }
   };
 
-  const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleFormSubmit = () => {
     if (selectedProgram) {
       onSubmit(selectedProgram.code);
       form.reset();

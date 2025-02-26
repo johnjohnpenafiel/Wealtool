@@ -3,7 +3,11 @@ import SchoolHeader from "@/app/school/components/SchoolHeader";
 import SchoolStats from "@/app/school/components/SchoolStats";
 import ProgramSection from "@/app/school/components/ProgramSection";
 
-async function SchoolPage({ params }: { params: { school_id: string } }) {
+type Params = Promise<{
+  school_id: string;
+}>;
+
+async function SchoolPage({ params }: { params: Params }) {
   const { school_id } = await params;
   const schoolId = decodeURIComponent(school_id);
   const data = await fetchSchool(schoolId);

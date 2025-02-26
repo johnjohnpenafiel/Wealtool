@@ -105,7 +105,7 @@ export default function SchoolForm() {
   const router = useRouter();
 
   // ----- Handle Form Submission ----- //
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit() {
     if (!selectedSchoolId) {
       console.error("No school ID selected");
       return;
