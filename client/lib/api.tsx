@@ -106,3 +106,24 @@ export async function fetchProgramData(
     return null;
   }
 }
+
+export async function generateEarnings(
+  degree: string,
+  missing_earnings: string
+) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/generate-earnings?degree_title=${degree}&missing_earnings=${missing_earnings}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to generate earnings");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error generating earnings:", error);
+    return null;
+  }
+}

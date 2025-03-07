@@ -30,7 +30,19 @@ export default function ProgramSection({ programs, schoolId }: Props) {
       </div>
       {programData && (
         <div className="mt-8">
-          <ProgramCard programData={programData} />
+          <ProgramCard
+            title={
+              programData.results[0]["latest.programs.cip_4_digit"][0].title
+            }
+            earnings1Year={
+              programData.results[0]["latest.programs.cip_4_digit"][0].earnings
+                .highest["1_yr"].overall_median_earnings
+            }
+            earnings2Year={
+              programData.results[0]["latest.programs.cip_4_digit"][0].earnings
+                .highest["2_yr"].overall_median_earnings
+            }
+          />
         </div>
       )}
     </div>
