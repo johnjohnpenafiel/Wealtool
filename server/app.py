@@ -98,7 +98,7 @@ def fetch_school():
 def fetch_program():
     school_id = request.args.get("school_id")
     program_code = request.args.get("program_code")
-
+    
     if not school_id or not program_code:
         return jsonify({"error": "Both school_id and program_code are required"}), 400
 
@@ -123,6 +123,21 @@ def fetch_program():
 
         return jsonify(data)
 
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/generate-earnings", methods=["GET"])
+def generate_earnings():
+    degree_title = request.args.get("degree_title")
+    missing_earnings = request.args.get("missing_earnings")
+
+    if not degree_title or not missing_earnings:
+        return jsonify({"error": "Both degree_title and missing_earnings are required"}), 400
+
+    try:
+        # Capture the output from the generate function
+        generated_earnings = generate(degree_title, missing_earnings)
+        return jsonify({"generatedEarnings": generated_earnings})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

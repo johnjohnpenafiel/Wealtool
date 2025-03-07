@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCurrency(amount: number | null | undefined): string {
-  if (amount == null) return "N/A";
+  if (amount == null) return "No Data";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",

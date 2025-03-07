@@ -22,6 +22,7 @@ export default function ProgramSection({ programs, schoolId }: Props) {
     const data = await fetchProgramData(schoolId, programCode);
     setProgramData(data);
   };
+
   return (
     <div>
       <div className="mt-8">
