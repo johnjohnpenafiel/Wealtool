@@ -5,7 +5,8 @@ from flask_cors import CORS
 import requests
 import os
 import math
-from gemini import generate  # Import the generate function
+from gemini import generate
+import json
 
 app = Flask(__name__)
 
@@ -139,8 +140,11 @@ def generate_earnings():
         # Call the generate function from gemini.py
         generated_data = generate(degree_title, missing_earnings)
         
-        # Assuming generate function returns JSON data
-        return jsonify(generated_data)
+        # Parse the JSON string into a Python dictionary
+        parsed_data = json.loads(generated_data)
+        
+        # Return the parsed JSON data
+        return jsonify(parsed_data)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

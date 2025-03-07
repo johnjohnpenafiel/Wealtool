@@ -3,8 +3,19 @@ import os
 from google import genai
 from google.genai import types
 
+import asyncio
 
-def generate():
+def ensure_event_loop():
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
+
+def generate(degree_title, missing_earnings):
+    loop = ensure_event_loop()
+
     client = genai.Client(
         api_key=os.environ.get("GEMINI_API_KEY"),
     )
@@ -23,7 +34,7 @@ def generate():
                 \"Mechanical Engineering, 1 year median earnings, 2 year median earnings\"
 
                 Based on this input, please return current and reliable numerical median earnings data for the specified degree. If data is available for both 1-year and 2-year median earnings, include both values. If only one metric is available, return just that one."""),
-                types.Part.from_text(text="""Computer Science, 1 year median earnings, 2 year median earnings"""),
+                types.Part.from_text(text=f"""{degree_title}, {missing_earnings}"""),
             ],
         ),
     ]
@@ -55,12 +66,15 @@ def generate():
         ],
     )
 
+    response_data = ""
     for chunk in client.models.generate_content_stream(
         model=model,
         contents=contents,
         config=generate_content_config,
     ):
-        print(chunk.text, end="")
+        response_data += chunk.text
+
+    return response_data
 
 if __name__ == "__main__":
     generate()
