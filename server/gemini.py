@@ -20,9 +20,9 @@ def generate():
                 For example:
 
                 \"Computer Science, 1 year median earnings\"
-                \"Mechanical Engineering, 1 year and 2 year median earnings\"
+                \"Mechanical Engineering, 1 year median earnings, 2 year median earnings\"
 
-                Based on this input, please return only the latest available numerical median earnings data for the specified degree. If data is available for both 1-year and 2-year median earnings, include both values. If only one metric is available, return just that one."""),
+                Based on this input, please return current and reliable numerical median earnings data for the specified degree. If data is available for both 1-year and 2-year median earnings, include both values. If only one metric is available, return just that one."""),
                 types.Part.from_text(text="""Computer Science, 1 year median earnings, 2 year median earnings"""),
             ],
         ),
