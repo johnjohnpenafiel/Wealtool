@@ -14,33 +14,27 @@ interface Props {
 interface EarningsState {
   earnings1Year: number | null;
   earnings2Year: number | null;
-  isGenerated1Year: boolean;
-  isGenerated2Year: boolean;
+  isAIGenerated1Year: boolean;
+  isAIGenerated2Year: boolean;
 }
 
 const ProgramCard = ({ title, earnings1Year, earnings2Year }: Props) => {
-  console.log("Received props:", { earnings1Year, earnings2Year });
-
   const [earnings, setEarnings] = useState<EarningsState>({
     earnings1Year,
     earnings2Year,
-    isGenerated1Year: false,
-    isGenerated2Year: false,
+    isAIGenerated1Year: false,
+    isAIGenerated2Year: false,
   });
 
   // Update state when props change
   useEffect(() => {
-    console.log("Updating state with new props:", {
-      earnings1Year,
-      earnings2Year,
-    });
     setEarnings({
       earnings1Year,
       earnings2Year,
-      isGenerated1Year: false,
-      isGenerated2Year: false,
+      isAIGenerated1Year: false,
+      isAIGenerated2Year: false,
     });
-  }, [earnings1Year, earnings2Year]);
+  }, [earnings1Year, earnings2Year, title]);
 
   useEffect(() => {
     const fetchEarnings = async () => {
@@ -54,30 +48,32 @@ const ProgramCard = ({ title, earnings1Year, earnings2Year }: Props) => {
           missingEarnings += "2 year median earnings";
         }
 
-        console.log("Missing earnings:", missingEarnings);
-
         if (missingEarnings) {
+          // Reset earnings to null to trigger loading animation only if data is missing
+          setEarnings((prevEarnings) => ({
+            ...prevEarnings,
+            earnings1Year:
+              earnings1Year === null ? null : prevEarnings.earnings1Year,
+            earnings2Year:
+              earnings2Year === null ? null : prevEarnings.earnings2Year,
+          }));
+
           const data = await generateEarnings(title, missingEarnings);
-          console.log("Fetched data:", data);
 
           if (data) {
-            setEarnings((prevEarnings) => {
-              const updatedEarnings = {
-                ...prevEarnings,
-                earnings1Year:
-                  data.response["1_year_median_earnings"] ??
-                  prevEarnings.earnings1Year,
-                earnings2Year:
-                  data.response["2_year_median_earnings"] ??
-                  prevEarnings.earnings2Year,
-                isGenerated1Year:
-                  data.response["1_year_median_earnings"] !== undefined,
-                isGenerated2Year:
-                  data.response["2_year_median_earnings"] !== undefined,
-              };
-              console.log("Updated earnings state:", updatedEarnings);
-              return updatedEarnings;
-            });
+            setEarnings((prevEarnings) => ({
+              ...prevEarnings,
+              earnings1Year:
+                data.response["1_year_median_earnings"] ??
+                prevEarnings.earnings1Year,
+              earnings2Year:
+                data.response["2_year_median_earnings"] ??
+                prevEarnings.earnings2Year,
+              isAIGenerated1Year:
+                data.response["1_year_median_earnings"] !== undefined,
+              isAIGenerated2Year:
+                data.response["2_year_median_earnings"] !== undefined,
+            }));
           }
         }
       } catch (error) {
@@ -93,42 +89,44 @@ const ProgramCard = ({ title, earnings1Year, earnings2Year }: Props) => {
   return (
     <Card className="mb-4">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-300">
-          {title}
-        </CardTitle>
+        <CardTitle className="text-xl font-bold">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        <div className="flex items-center">
-          <p className="text-lg font-bold text-white pr-1">
-            1 Year Earnings:{" "}
+        <div className="flex flex-col">
+          <p className="text-lg text-white">1 Year Earnings:</p>
+          <div className="flex items-center">
             <span
-              className={
-                earnings.isGenerated1Year ? "text-blue-500" : "text-white"
-              }
+              className={`text-xl ${
+                earnings.isAIGenerated1Year
+                  ? "text-blue-500 pr-2"
+                  : "text-white"
+              }`}
             >
               {earnings.earnings1Year !== null ? (
                 formatCurrency(earnings.earnings1Year)
               ) : (
                 <ScaleLoader
                   color="#ffffff"
-                  height={20}
+                  height={15}
                   width={5}
                   speedMultiplier={0.5}
                 />
               )}
             </span>
-          </p>
-          {earnings.isGenerated1Year && (
-            <InfoButton message="This result was generated using AI due to missing data. Please note that it may not be entirely accurate." />
-          )}
+            {earnings.isAIGenerated1Year && (
+              <InfoButton message="This result was generated using AI due to missing data. Please note that it may not be entirely accurate." />
+            )}
+          </div>
         </div>
-        <div className="flex items-center">
-          <p className="text-lg font-bold text-white pr-1">
-            2 Year Earnings:{" "}
+        <div className="flex flex-col">
+          <p className="text-lg text-white">2 Year Earnings:</p>
+          <div className="flex items-center">
             <span
-              className={
-                earnings.isGenerated2Year ? "text-blue-500" : "text-white"
-              }
+              className={`text-xl ${
+                earnings.isAIGenerated2Year
+                  ? "text-blue-500 pr-2"
+                  : "text-white"
+              }`}
             >
               {earnings.earnings2Year !== null ? (
                 formatCurrency(earnings.earnings2Year)
@@ -141,10 +139,12 @@ const ProgramCard = ({ title, earnings1Year, earnings2Year }: Props) => {
                 />
               )}
             </span>
-          </p>
-          {earnings.isGenerated2Year && (
-            <InfoButton message="This result was generated using AI due to missing data. Please note that it may not be entirely accurate." />
-          )}
+            <div className="flex items-center justify-center">
+              {earnings.isAIGenerated2Year && (
+                <InfoButton message="This result was generated using AI due to missing data. Please note that it may not be entirely accurate." />
+              )}
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
