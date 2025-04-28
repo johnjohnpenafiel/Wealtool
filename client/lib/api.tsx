@@ -1,32 +1,34 @@
-type SchoolsResponse = {
-  metadata: {
-    total: number;
-  };
-  results: {
-    id: string;
-    "school.name": string;
-  }[];
-};
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-type SchoolResponse = {
-  results: {
-    id: string;
-    "school.name": string;
-    "school.city": string;
-    "school.state": string;
-    "school.school_url": string;
-    "latest.student.size": number;
-    "latest.cost.tuition.in_state": number;
-    "latest.cost.tuition.out_of_state": number;
-    "latest.aid.median_debt.completers.overall": number;
-    "latest.academics.program_available.bachelor": boolean;
-    "latest.earnings.10_yrs_after_entry.median": number;
-    "latest.programs.cip_4_digit": {
-      code: string;
-      title: string;
-    }[];
-  }[];
-};
+// type SchoolsResponse = {
+//   metadata: {
+//     total: number;
+//   };
+//   results: {
+//     id: string;
+//     "school.name": string;
+//   }[];
+// };
+
+// type SchoolResponse = {
+//   results: {
+//     id: string;
+//     "school.name": string;
+//     "school.city": string;
+//     "school.state": string;
+//     "school.school_url": string;
+//     "latest.student.size": number;
+//     "latest.cost.tuition.in_state": number;
+//     "latest.cost.tuition.out_of_state": number;
+//     "latest.aid.median_debt.completers.overall": number;
+//     "latest.academics.program_available.bachelor": boolean;
+//     "latest.earnings.10_yrs_after_entry.median": number;
+//     "latest.programs.cip_4_digit": {
+//       code: string;
+//       title: string;
+//     }[];
+//   }[];
+// };
 
 type EarningsDetails = {
   overall_median_earnings: number;
@@ -53,7 +55,7 @@ export type ProgramResponse = {
 export async function fetchSchools(stateCode: string) {
   try {
     const response = await fetch(
-      `http://localhost:5000/fetch-schools?stateCode=${stateCode}`
+      `${BASE_URL}/fetch-schools?stateCode=${stateCode}`
     );
 
     if (!response.ok) {
@@ -71,7 +73,7 @@ export async function fetchSchools(stateCode: string) {
 export async function fetchSchool(school_id: string) {
   try {
     const response = await fetch(
-      `http://localhost:5000/fetch-school?school_id=${school_id}`
+      `${BASE_URL}/fetch-school?school_id=${school_id}`
     );
 
     if (!response.ok) {
@@ -92,7 +94,7 @@ export async function fetchProgramData(
 ) {
   try {
     const response = await fetch(
-      `http://localhost:5000/fetch-program?school_id=${school_id}&program_code=${program_code}`
+      `${BASE_URL}/fetch-program?school_id=${school_id}&program_code=${program_code}`
     );
 
     if (!response.ok) {
@@ -113,7 +115,7 @@ export async function generateEarnings(
 ) {
   try {
     const response = await fetch(
-      `http://localhost:5000/generate-earnings?degree_title=${degree}&missing_earnings=${missing_earnings}`
+      `${BASE_URL}/generate-earnings?degree_title=${degree}&missing_earnings=${missing_earnings}`
     );
 
     if (!response.ok) {
