@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
@@ -9,11 +8,11 @@ from gemini import generate
 import json
 
 app = Flask(__name__)
-
 CORS(app)
 
 API_KEY = os.getenv("COLLEGEBOARD_API_KEY")
 PER_PAGE = 100
+
 BASE_URL = "https://api.data.gov/ed/collegescorecard/v1/schools"
 
 @app.route("/")

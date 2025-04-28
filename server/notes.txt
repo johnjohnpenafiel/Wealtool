@@ -1,0 +1,7 @@
+DEPLOY with RENDER
+
+# Create a requirments.txt
+# remember to run "pipenv requirements > requirements.txt" whenever you add a nnew dependancy to the project.
+
+# Create a Procfile
+# Inside put "web: gunicorn app:app"
